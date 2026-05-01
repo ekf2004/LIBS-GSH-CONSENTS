@@ -11,7 +11,7 @@
 // ---- Config ----
 // The Cloudflare Worker URL. When empty, the app runs in "demo mode" using
 // stub data — useful for UI testing before the Worker is deployed.
-const WORKER_URL = "";  // e.g. "https://gsh-extract.your-subdomain.workers.dev"
+const WORKER_URL = "https://gsh-extract.libs-tools.workers.dev";  
 
 // Path to the blank consent template (committed in this repo)
 const BLANK_CONSENT_PATH = "./assets/GSH_BLANK_CONSENT.pdf";
