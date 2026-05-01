@@ -1,0 +1,229 @@
+/* GSH Consent Generator — clean clinical utility styling.
+   Calibrated for an older user who valued the Babylon tool's simplicity:
+   - large clickable areas
+   - generous whitespace
+   - one thing happening at a time
+   - sober color palette; no decorative flourishes
+*/
+
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --ink: #1a1a1a;
+  --ink-soft: #555;
+  --ink-faint: #888;
+  --line: #d4d4d0;
+  --line-strong: #b3b3ac;
+  --primary: #1f5f7a;          /* hospital teal */
+  --primary-dark: #134457;
+  --primary-soft: #e7f1f5;
+  --accent: #c46a3f;            /* warm warning/action */
+  --error: #b03030;
+  --success: #4a7a3f;
+  --warn: #b27a00;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.site-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+  padding: 1.25rem 2rem;
+}
+.site-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  color: var(--primary-dark);
+}
+.subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+main {
+  max-width: 1100px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+/* Step visibility — only one step shows at a time */
+.step { display: none; }
+.step.active { display: block; }
+
+/* Dropzone */
+.dropzone {
+  background: var(--surface);
+  border: 3px dashed var(--line-strong);
+  border-radius: 12px;
+  padding: 4rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dropzone:hover, .dropzone.drag-over {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+.dropzone-icon { font-size: 3rem; line-height: 1; }
+.dropzone-prompt {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+.dropzone-hint {
+  font-size: 1rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* Instructions accordion */
+.instructions {
+  margin-top: 2rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1.25rem;
+}
+.instructions summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.5rem 0;
+  color: var(--ink-soft);
+}
+.instructions ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.5rem;
+  color: var(--ink-soft);
+}
+.instructions li { padding: 0.25rem 0; }
+
+/* Status / progress */
+h2 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem;
+  color: var(--primary-dark);
+}
+.status {
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  margin: 0 0 1.5rem;
+}
+.hint {
+  font-size: 0.95rem;
+  color: var(--ink-faint);
+  margin: 0 0 1.5rem;
+}
+
+.progress-track {
+  background: var(--line);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  background: var(--primary);
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Review table */
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: auto;
+  margin-bottom: 1.5rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+th, td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+th {
+  background: var(--primary-soft);
+  font-weight: 600;
+  color: var(--primary-dark);
+  position: sticky;
+  top: 0;
+}
+tbody tr:last-child td { border-bottom: none; }
+
+td.editable { cursor: text; }
+td.editable:hover { background: var(--primary-soft); }
+td.editable[contenteditable="true"] {
+  outline: 2px solid var(--primary);
+  background: white;
+}
+
+td.status-cell { text-align: center; font-weight: 600; }
+td.status-ok { color: var(--success); }
+td.status-warn { color: var(--warn); }
+td.status-error { color: var(--error); }
+
+/* Buttons */
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 0.85rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-primary:disabled {
+  background: var(--ink-faint);
+  cursor: not-allowed;
+}
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-strong);
+}
+.btn-secondary:hover { background: var(--bg); }
+
+/* Errors */
+.error {
+  background: #fde9e7;
+  border-left: 4px solid var(--error);
+  padding: 1rem 1.25rem;
+  border-radius: 4px;
+  color: var(--ink);
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+}
+footer a { color: var(--ink-soft); }

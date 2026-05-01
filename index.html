@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LIBS GSH Consent Generator</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>LIBS GSH Consent Generator</h1>
+      <p class="subtitle">Good Samaritan Hospital · Long Island Brain &amp; Spine</p>
+    </header>
+
+    <main>
+      <!-- Step 1: Drop zone (initial state) -->
+      <section id="step-upload" class="step active">
+        <div id="dropzone" class="dropzone" role="button" tabindex="0">
+          <div class="dropzone-icon">📄</div>
+          <p class="dropzone-prompt">Drop the booking sheet PDF here</p>
+          <p class="dropzone-hint">or click to choose a file</p>
+          <input type="file" id="file-input" accept="application/pdf" hidden />
+        </div>
+
+        <details class="instructions">
+          <summary>How this works</summary>
+          <ol>
+            <li>Donna scans the day's booking sheets into one PDF</li>
+            <li>Drop the PDF here</li>
+            <li>The tool reads each booking sheet and extracts patient name, doctor, procedure, and date</li>
+            <li>Review the extracted info, then click Generate</li>
+            <li>Download the merged consents PDF and print</li>
+          </ol>
+        </details>
+      </section>
+
+      <!-- Step 2: Extracting (in progress) -->
+      <section id="step-extract" class="step">
+        <h2>Reading booking sheets…</h2>
+        <p id="extract-status" class="status">Preparing…</p>
+        <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
+      </section>
+
+      <!-- Step 3: Review (data extracted, awaiting confirmation) -->
+      <section id="step-review" class="step">
+        <h2>Review extracted data</h2>
+        <p class="hint">Check that names, doctors, and procedures look right. Click any cell to edit.</p>
+        <div class="table-wrap">
+          <table id="review-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Procedure</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="review-tbody"></tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button id="btn-back-to-upload" class="btn btn-secondary">Start over</button>
+          <button id="btn-generate" class="btn btn-primary">Generate consents</button>
+        </div>
+      </section>
+
+      <!-- Step 4: Generating consents -->
+      <section id="step-generate" class="step">
+        <h2>Building consents PDF…</h2>
+        <p class="status">One moment.</p>
+      </section>
+
+      <!-- Step 5: Done -->
+      <section id="step-done" class="step">
+        <h2>Done</h2>
+        <p class="status" id="done-summary"></p>
+        <div class="actions">
+          <button id="btn-download" class="btn btn-primary">Download consents PDF</button>
+          <button id="btn-restart" class="btn btn-secondary">Start over</button>
+        </div>
+      </section>
+
+      <!-- Errors -->
+      <section id="step-error" class="step">
+        <h2>Something went wrong</h2>
+        <p id="error-message" class="error"></p>
+        <div class="actions">
+          <button id="btn-error-restart" class="btn btn-secondary">Start over</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>v1.0 · <a href="https://github.com/ekf2004/LIBS-GSH-CONSENTS" target="_blank" rel="noopener">source</a></p>
+    </footer>
+
+    <script src="./assets/pdf-lib.min.js"></script>
+    <script src="./consent-generator.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
