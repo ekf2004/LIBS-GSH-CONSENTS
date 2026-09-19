@@ -1,14 +1,13 @@
 // GSH consent generator — port of generate_consents.py to browser JavaScript.
 // Expects pdf-lib loaded as global (window.PDFLib) via <script> tag in index.html.
 // Exposes window.generateMergedConsents(patients, blankConsentBytes).
+//
+// v1.1 — uses embedPage() for template deduplication. The blank consent template
+// graphics are embedded ONCE and referenced by all pages, keeping output files
+// small enough to email as attachments.
 
 (function () {
 const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
-
-// ---- Layout calibration ----
-// Reference page: 612 x 792 pt (US Letter).
-// All coordinates below are in PIXELS at the 150-DPI reference scan (1275 x 1650 px),
-// converted to PDF points by pxToPt(). PDF y-axis is flipped (origin bottom-left).
 
 const PAGE_W_PT = 612;
 const PAGE_H_PT = 792;
@@ -25,22 +24,16 @@ function pxToPt(pxX, pxY) {
 // Field positions (calibrated against the GSH consent template)
 const PATIENT_NAME_CENTER_PX = 985;
 const PATIENT_NAME_Y_PX = 110;
-
 const DOCTOR_LINE_CENTER_PX = 450;
 const DOCTOR_LINE_BASELINE_PX = 320;
-
 const PROCEDURE_X_PX = 150;
 const PROCEDURE_TOP_PX = 380;
 const PROCEDURE_WIDTH_PX = 1000;
 const PROCEDURE_WIDTH_PT = (PROCEDURE_WIDTH_PX * PAGE_W_PT) / REF_W_PX;
-
 const DATE_X_PX = 825;
 const DATE_BASELINE_PX = 1486;
 
-// ---- Text fitting (procedure may need wrapping or font shrinking) ----
-
 function wrapText(text, font, fontSize, maxWidthPt) {
-  // Greedy word wrap. Returns array of lines.
   const words = text.split(/\s+/);
   const lines = [];
   let current = [];
@@ -58,32 +51,26 @@ function wrapText(text, font, fontSize, maxWidthPt) {
 }
 
 function fitProcedure(text, font, maxWidthPt) {
-  // Try single-line at decreasing sizes
   for (const size of [12, 11, 10]) {
     if (font.widthOfTextAtSize(text, size) <= maxWidthPt) {
       return { fontSize: size, lines: [text], lineHeight: size + 3 };
     }
   }
-  // Two-line attempts with tight leading
   for (const size of [11, 10]) {
     const lines = wrapText(text, font, size, maxWidthPt);
     if (lines.length === 2) {
       return { fontSize: size, lines, lineHeight: size + 1 };
     }
   }
-  // Three-line fallback
   for (const size of [10, 9]) {
     const lines = wrapText(text, font, size, maxWidthPt);
     if (lines.length <= 3) {
       return { fontSize: size, lines, lineHeight: size + 1 };
     }
   }
-  // Last resort — smallest font, however many lines
   const lines = wrapText(text, font, 9, maxWidthPt);
   return { fontSize: 9, lines, lineHeight: 10 };
 }
-
-// ---- Drawing helpers ----
 
 function drawCentered(page, font, text, fontSize, centerXPx, baselineYPx) {
   const { x, y } = pxToPt(centerXPx, baselineYPx);
@@ -102,26 +89,26 @@ function drawLeft(page, font, text, fontSize, xPx, baselineYPx) {
   page.drawText(text, { x, y, font, size: fontSize, color: rgb(0, 0, 0) });
 }
 
-// ---- Main API ----
-
-/**
- * Generate one merged PDF containing one consent per patient.
- *
- * @param {Array<{patient_name: string, doctor: string, procedure: string, procedure_date: string}>} patients
- * @param {ArrayBuffer} blankConsentBytes — the blank GSH consent PDF as bytes
- * @returns {Promise<Uint8Array>} the merged PDF as bytes
- */
 async function generateMergedConsents(patients, blankConsentBytes) {
   const merged = await PDFDocument.create();
   const helveticaBold = await merged.embedFont(StandardFonts.HelveticaBold);
   const helvetica = await merged.embedFont(StandardFonts.Helvetica);
 
+  // Embed the blank template ONCE as a reusable Form XObject.
+  // All patient pages will reference this shared object rather than copying
+  // the full template bytes for each page. This is what keeps the file small.
+  const templateDoc = await PDFDocument.load(blankConsentBytes);
+  const [embeddedTemplate] = await merged.embedPages([templateDoc.getPages()[0]]);
+
   for (const patient of patients) {
-    // Load a fresh copy of the blank template each iteration
-    const template = await PDFDocument.load(blankConsentBytes);
-    const [templatePage] = await merged.copyPages(template, [0]);
-    merged.addPage(templatePage);
-    const page = merged.getPages()[merged.getPageCount() - 1];
+    // Create a fresh blank letter-sized page and stamp the shared template onto it
+    const page = merged.addPage([PAGE_W_PT, PAGE_H_PT]);
+    page.drawPage(embeddedTemplate, {
+      x: 0,
+      y: 0,
+      width: PAGE_W_PT,
+      height: PAGE_H_PT,
+    });
 
     // 1. Patient name — top-right header, bold 14pt centered
     drawCentered(
